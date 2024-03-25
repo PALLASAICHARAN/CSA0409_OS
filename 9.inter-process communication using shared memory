@@ -1,20 +1,47 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<unistd.h>
-#include<sys/shm.h>
-#include<string.h>
-int main()
-{
-int i;
-void *shared_memory;
-char buff[100];
-int shmid;
-shmid=shmget((key_t)2345, 1024, 0666|IPC_CREAT);
-printf("Key of shared memory is %d\n",shmid);
-shared_memory=shmat(shmid,NULL,0);
-printf("Process attached at %p\n",shared_memory);
-printf("Enter some data to write to shared memory\n");
-read(0,buff,100);
-strcpy(shared_memory,buff);
-printf("You wrote : %s\n",(char *)shared_memory);
+#include <stdio.h>
+#include <windows.h>
+
+#define BUF_SIZE 256
+#define SHARED_MEM_NAME "Local\\MySharedMemory"
+
+int main() {
+    HANDLE hMapFile;
+    LPCTSTR pBuf;
+
+    hMapFile = CreateFileMapping(
+        INVALID_HANDLE_VALUE,    // Use the page file
+        NULL,                    // Default security
+        PAGE_READWRITE,          // Read/write access
+        0,                       // Maximum object size (high-order DWORD)
+        BUF_SIZE,                // Maximum object size (low-order DWORD)
+        SHARED_MEM_NAME);        // Name of the mapping object
+
+    if (hMapFile == NULL) {
+        printf("Could not create file mapping object (%d)\n", GetLastError());
+        return 1;
+    }
+
+    pBuf = (LPTSTR)MapViewOfFile(
+        hMapFile,            // Handle to the map object
+        FILE_MAP_ALL_ACCESS, // Read/write permission
+        0,
+        0,
+        BUF_SIZE);
+
+    if (pBuf == NULL) {
+        printf("Could not map view of file (%d)\n", GetLastError());
+        CloseHandle(hMapFile);
+        return 1;
+    }
+
+    printf("Enter a message to be written to shared memory: ");
+    fgets((char*)pBuf, BUF_SIZE, stdin);
+
+    printf("Message written to shared memory: %s\n", pBuf);
+
+    UnmapViewOfFile(pBuf);
+    CloseHandle(hMapFile);
+
+    return 0;
 }
+
