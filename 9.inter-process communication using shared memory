@@ -9,12 +9,12 @@ int main() {
     LPCTSTR pBuf;
 
     hMapFile = CreateFileMapping(
-        INVALID_HANDLE_VALUE,    // Use the page file
-        NULL,                    // Default security
-        PAGE_READWRITE,          // Read/write access
-        0,                       // Maximum object size (high-order DWORD)
-        BUF_SIZE,                // Maximum object size (low-order DWORD)
-        SHARED_MEM_NAME);        // Name of the mapping object
+        INVALID_HANDLE_VALUE,    
+        NULL,                   
+        PAGE_READWRITE,          
+        0,                      
+        BUF_SIZE,                
+        SHARED_MEM_NAME);        
 
     if (hMapFile == NULL) {
         printf("Could not create file mapping object (%d)\n", GetLastError());
@@ -22,8 +22,8 @@ int main() {
     }
 
     pBuf = (LPTSTR)MapViewOfFile(
-        hMapFile,            // Handle to the map object
-        FILE_MAP_ALL_ACCESS, // Read/write permission
+        hMapFile,            
+        FILE_MAP_ALL_ACCESS, 
         0,
         0,
         BUF_SIZE);
@@ -44,4 +44,5 @@ int main() {
 
     return 0;
 }
+
 
